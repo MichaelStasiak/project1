@@ -1,0 +1,95 @@
+
+body {
+    overflow: hidden;
+  }
+
+.container-fluid {
+    padding: 0 !important;
+    
+}
+
+#map {
+	width: 100%;
+    height: 94vh;
+}
+
+/*  Div overlay info styles */
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,255,0.3);
+    border-radius: 5px;
+}
+
+.info h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+
+span {
+	color: blue;
+}
+
+/* loader styles  */
+.loader-container{
+    width: 100%;
+    height: 100vh;
+    background-color: #111;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 998;
+}
+
+.loader{
+    width: 50px;
+    height: 50px;
+    border: 5px solid;
+    color: #3498db;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: loader 1.2s linear infinite;
+    z-index: 999;
+}
+
+@keyframes loader{
+    25%{
+        color: #2ecc71;
+    }
+    50%{
+        color: #f1c40f;
+    }
+    75%{
+        color: #e74c3c;
+    }
+    to{
+        transform: rotate(360deg);
+    }
+}
+
+#txtIcon {
+    margin: auto;
+    width: 25%;
+    height: 25%;
+    border: 2px solid black;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #fffff3;
+    
+}
+
+#logo {
+    height: 25px; 
+    width:25px;
+}
+
+span img {
+    width: 100%;
+}
+
+#txtWiki {
+    color: #111;
+}
