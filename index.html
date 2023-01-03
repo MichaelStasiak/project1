@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Gazetter Project</title>
+	<title>Gazetteer Project</title>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/x-icon" href="./assets/imgs/favicon.ico">
-	<link rel="stylesheet" href="css/style.css">
+	
     <!--================ DEVELOPMENT CDNs ================================= -->
 	<!-- jQuery CDN 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>-->
@@ -15,32 +15,30 @@
 	 -->
 	 <!-- marker cluster CDN
 	<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">-->
-	<!-- LEAFLET JS 
+	<!-- LEAFLET JS  
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
-	<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>--> 
-	<!--IMPORTANT!! easy button plugin THIS CAN NOT BE DOWNLOADED - NO SOURCE FILES IN REPOSITORY!! -->
+	<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>-->
+	<!--easy button plugin 
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
-	<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>-->
 	<!-- awesome icons 
 	<script src="https://kit.fontawesome.com/968c53da00.js" crossorigin="anonymous"></script>-->
 
     <!--================ PRODUCTION / local files================================= -->
 	<!-- bootstrap -->
 	<link rel="stylesheet" href="./assets/libs/bootstrap-5.0.2-dist/css/bootstrap.css" />
-	<script src="./assets/libs/bootstrap-5.0.2-dist/js/bootstrap.js"></script>
 	<!-- leaflet.js -->
 	<link rel="stylesheet" href="./assets/libs/leaflet/leaflet.css" />
-	<script src="./assets/libs/leaflet/leaflet.js"></script>
+	<!-- easy button -->
+	<link rel="stylesheet" href="./assets/libs/distEasyButton/easy-button.css" />
 	<!-- marker cluster-->
-	<script src="./assets/libs/distCluster/leaflet.markercluster.js"></script>
 	<link rel="stylesheet" href="./assets/libs/distCluster/MarkerCluster.css" />
     <link rel="stylesheet" href="./assets/libs/distCluster/MarkerCluster.Default.css" />
 	<!-- extra markers -->
 	<link rel="stylesheet" href="./assets/libs/distMarkers/css/leaflet.extra-markers.min.css">
-	<script src="./assets/libs/distMarkers/js/leaflet.extra-markers.min.js"></script>
 	<!-- font awesome -->
 	<link rel="stylesheet" href="./assets/libs/fontawesome-free-6.2.1-web/css/all.css">
-
+	<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 	<!-- loader -->
@@ -49,29 +47,24 @@
     </div>
 
 	<div class="container-fluid">	
-		<!-- navbar -->
+		<!-- navbar 
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 			<div class="container-fluid">
-			  <a class="navbar-brand ms-3" href="#"><img id="logo" class="me-2" src="assets/imgs/LOGO4.svg" alt="logo">Gazetter Project</a>
+			  <a class="navbar-brand ms-3" href="#">Gazetteer Project</a>
 			  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			  </button>
 			  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-				  <li class="nav-item">
-					<a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a>
-				  </li>
-				  <li class="nav-item">
-					<a class="nav-link" href="https://github.com/StasiakMike/project1">GitHub<i class="fa-brands fa-github"></i></a>
-				  </li>
-				</ul>
 				<form class="d-flex">
-					Choose a country:
 					<select id="selCountry" name="countryCode" class="form-control me-2"></select>
 				</form>
 			  </div>
 			</div>
-		</nav>
+		</nav>-->
+
+		<div id="selectDiv">
+			<select id="selCountry" name="countryCode" class="form-control mt-3 position-fixed ms-5"></select>
+		</div>
 		
 		<!-- map -->
 		<div id="map"></div>
@@ -114,17 +107,42 @@
 			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-			Country:      <span id="txtcountryName"></span><br/>
-			Country Code: <span id="txtcountryCode"></span><br/>
-			Capital:	  <span id="txtCapital"></span><br/>
-			Currency:	  <span id="txtCurrency"></span> <span id="symbol"></span><br/>
-			Languages:	  <span id="txtLanguages"></span><br/>
-			Population:	  <span id="txtPopulation"></span><br/>
-			Area:		  <span id="txtArea"></span><br/>
-			Continent: 	  <span id="txtcontinentName"></span><br/>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<table class="table">
+					<tbody>
+					  <tr class="table-success">
+						<td colspan="2">Country:</td>
+						<td><span id="txtcountryName"></span></td>
+					  </tr>
+					  <tr>
+						<td colspan="2">Country Code:</td>
+						<td><span id="txtcountryCode"></span></td>
+					  </tr>
+					  <tr class="table-success">
+						<td colspan="2">Capital:</td>
+						<td><span id="txtCapital"></span></td>
+					  </tr>
+					  <tr>
+						<td colspan="2">Currency:</td>
+						<td><span id="txtCurrency"></span> <span id="symbol"></span></td>
+					  </tr>
+					  <tr class="table-success">
+						<td colspan="2">Languages:</td>
+						<td><span id="txtLanguages"></span></td>
+					  </tr>
+					  <tr>
+						<td colspan="2">Population:</td>
+						<td><span id="txtPopulation"></span></td>
+					  </tr>
+					  <tr class="table-success">
+						<td colspan="2">Area:</td>
+						<td><span id="txtArea"></span></td>
+					  </tr>
+					  <tr>
+						<td colspan="2">Continent:</td>
+						<td><span id="txtcontinentName"></span></td>
+					  </tr>
+					</tbody>
+				  </table>
 			</div>
 		</div>
 		</div>
@@ -132,6 +150,7 @@
 
 
 		<!-- Modal weather-->
+		<!--
 		<div class="modal fade" id="weatherModal" tabindex="-1" aria-labelledby="weatherModalLabel" aria-hidden="true">
 			<div class="modal-dialog modal-dialog-scrollable">
 			<div class="modal-content">
@@ -155,6 +174,66 @@
 					 	Direction: <span id="txtDirection"></span><br/>
 					 	Clouds: <span id="txtClouds"></span><br/>
 					 	Visibility: <span id="txtVisibility"></span><br/>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>-->
+
+		<div class="modal fade" id="weatherModal" tabindex="-1" aria-labelledby="weatherModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-body" id="weather">
+					<h4>Today</h4>
+					<div id="inner">
+						<br/>
+						<table>
+							<tr>
+							  <th><span id="txtCity"></span></th>
+							</tr>
+							<tr>
+							  <td><div class="" id="txtIcon"></div></td>
+							  <td><i class="fa-solid fa-temperature-three-quarters"></i><br>
+								<span id="txtTemperature1"></span><br>
+								<span id="txtTemperatureFeels1"></span>
+							 </td> 
+							  <td><i class="fa-solid fa-wind"></i><br>
+								<span id="txtWindSpeed"></span><br>
+								<span id="txtWindDirection"></span>
+							 </td>
+							 <td>
+								<span id="txtDescription"></span><br>
+							 </td>
+							</tr>
+							<tr id="forecast">
+							  <td>
+								<span id="txtIcon2"></span><br>
+								<span id="txtDate2"></span><br>
+								<span id="txtTemperature2"></span><br>
+								<span id="txtTemperatureFeels2"></span><br>
+								
+							  </td>
+							  <td>
+								<span id="txtIcon3"></span><br>
+								<span id="txtDate3"></span><br>
+								<span id="txtTemperature3"></span><br>
+								<span id="txtTemperatureFeels3"></span><br>
+							  </td> 
+							  <td>
+								<span id="txtIcon4"></span><br>
+								<span id="txtDate4"></span><br>
+								<span id="txtTemperature4"></span><br>
+								<span id="txtTemperatureFeels4"></span><br>
+							  </td>
+							  <td>
+								<span id="txtIcon5"></span><br>
+								<span id="txtDate5"></span><br>
+								<span id="txtTemperature5"></span><br>
+								<span id="txtTemperatureFeels5"></span><br>
+							  </td>
+							</tr>
+						  </table>
+						  <br>
 					</div>
 				</div>
 			</div>
@@ -188,26 +267,62 @@
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
-					Currency name:     <span id="currencyName"></span><br>
-					Currency ISO code: <span id="currencyIso_code"></span><br>
-					Currency symbol:   <span id="symbol"></span><br>
-					Currency subunit:  <span id="subunit"></span><br>
-					Subunits in unit:  <span id="subunit_to_unit"></span><br>
-					Flag:              <span id="flag"></span><br>
-					Calling code:      <span id="callingcode"></span><br>
-					Drive on:          <span id="drive_on"></span><br>
-					Speed units:       <span id="speed_in"></span><br>
-					Time zone:         <span id="timeZone"></span>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<table class="table">
+						<tbody>
+						  <tr class="table-success">
+							<td colspan="2">Currency name:</td>
+							<td><span id="currencyName"></span></td>
+						  </tr>
+						  <tr>
+							<td colspan="2">Currency ISO code:</td>
+							<td><span id="currencyIso_code"></span></td>
+						  </tr>
+						  <tr class="table-success">
+							<td colspan="2">Currency symbol:</td>
+							<td><span id="symbol"></span></td>
+						  </tr>
+						  <tr>
+							<td colspan="2">Currency subunit:</td>
+							<td><span id="subunit"></span></td>
+						  </tr>
+						  <tr class="table-success">
+							<td colspan="2">Subunits in unit:</td>
+							<td><span id="subunit_to_unit"></span></td>
+						  </tr>
+						  <tr>
+							<td colspan="2">Flag:</td>
+							<td> <span id="flag"></span></td>
+						  </tr>
+						  <tr class="table-success">
+							<td colspan="2">Calling code:</td>
+							<td><span id="callingcode"></span></td>
+						  </tr>
+						  <tr>
+							<td colspan="2">Drive on:</td>
+							<td><span id="drive_on"></span></td>
+						  </tr>
+						  <tr class="table-success">
+							<td colspan="2">Speed units:</td>
+							<td><span id="speed_in"></span></td>
+						  </tr>
+						  <tr>
+							<td colspan="2">Time zone:</td>
+							<td><span id="timeZone"></span></td>
+						  </tr>
+						</tbody>
+					  </table>
 				</div>
 			</div>
 			</div>
 		</div>
     <!-- ================ PRODUCTION ===================================-->
-	<!-- jQuery -->
 	<script src="./assets/libs/jquery-2.2.3.min.js"></script>
+	<script type="text/javascript" src="./assets/libs/distDate/date-en-GB.js"></script>
+	<script src="./assets/libs/bootstrap-5.0.2-dist/js/bootstrap.js"></script>
+	<script src="./assets/libs/leaflet/leaflet.js"></script>
+	<script src="./assets/libs/distEasyButton/easy-button.js"></script>
+	<script src="./assets/libs/distCluster/leaflet.markercluster.js"></script>
+	<script src="./assets/libs/distMarkers/js/leaflet.extra-markers.min.js"></script>
 	<script src="js/app.js"></script>
 	
 	

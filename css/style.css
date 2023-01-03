@@ -10,22 +10,7 @@ body {
 
 #map {
 	width: 100%;
-    height: 94vh;
-}
-
-/*  Div overlay info styles */
-.info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,255,0.3);
-    border-radius: 5px;
-}
-
-.info h4 {
-    margin: 0 0 5px;
-    color: #777;
+    height: 100vh;
 }
 
 span {
@@ -70,16 +55,6 @@ span {
     }
 }
 
-#txtIcon {
-    margin: auto;
-    width: 25%;
-    height: 25%;
-    border: 2px solid black;
-    text-align: center;
-    border-radius: 50%;
-    background-color: #fffff3;
-    
-}
 
 #logo {
     height: 25px; 
@@ -93,3 +68,69 @@ span img {
 #txtWiki {
     color: #111;
 }
+
+/* modal styles */
+
+.modal-header, .modal-footer {
+    background-color: #2ecc71;
+}
+
+
+#selectDiv {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 997; 
+    width: 100%;
+    opacity:  1;
+    justify-content: center;
+}
+
+#selCountry{
+    width: 40%;
+    border-color: #111;
+    border-style: outset;
+}
+
+#weatherModal .modal-body {
+    background: url(../assets/imgs/day.webp);
+    background-repeat: no-repeat;
+    background-size: auto;
+    color: #fffff3;
+}
+
+#weatherModal .modal-body #inner {
+    border-color: #98eb34;
+    border-width: thick;
+    border-top-style: solid;
+    border-bottom-style: solid;
+    
+}
+
+#weatherModal .modal-body #inner span {
+    color: #fffff3;
+}
+
+#forecast td {
+    text-align: center;
+}
+
+#supModal .modal-body, #countryInfoModal .modal-body{
+   padding: 0;
+   margin: 0;
+}
+
+/*  Div overlay info styles 
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,255,0.3);
+    border-radius: 5px;
+}
+
+.info h4 {
+    margin: 0 0 5px;
+    color: #777;
+}*/

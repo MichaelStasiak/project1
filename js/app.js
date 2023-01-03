@@ -1,21 +1,37 @@
 //Loader display ======================================================
 $(window).on("load", function() {
-    $(".loader-container").fadeOut(1500);
+	$(".loader-container").fadeOut(1500);
 });
 
-//	map setup:
+//	=== Map Setup: ============================================================
 let map = L.map("map").setView([49, 20], 4);
-
-//let firstCountry;	//	pierwszy kraj na liście krajów
-let geoJson;		//	zmienna z warstwą geograficzną
-let countryCode;	//	przechowuje countyCode
+let	geoJson = L.geoJSON(null, {style: {color: 'Green'}}).addTo(map);	//	zmienna z warstwą geograficzną (grupą warstw)
+let countryCode;	//	przechowuje countyCode aktualnego kraju
 let c;				//	współrzędne kliknięcia mapy
-var run = true;	//	zmienna do oznaczania zakończenia poszukiwania pierwszego kraju
 
-//	base layer setup:
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+//	=== Tile Layers Setup: ====================================================
+//	1. Open Street Map Layer:
+let osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 	maxZoom: 19,
 	attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+}).addTo(map);
+
+//	2. Google Street Map Layer:
+let gstrm = L.tileLayer("http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+	maxZoom: 20,
+	subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+}).addTo(map);
+
+//	3. Google Satelite Map Layer:
+let gsatm = L.tileLayer("http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}", {
+	maxZoom: 20,
+	subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+ }).addTo(map);
+
+ L.control.layers({
+	"Google Street Map":	gstrm,
+	"Google Satellite Map":	gsatm,
+	"Open Street Map":		osm
 }).addTo(map);
 
 //	set event's function:
@@ -38,7 +54,6 @@ const myIconSmall = L.icon({
 
 //	===========================================================================
 function fillSelect() {
-	//console.log("=== getCountries.php ===========================================================");
 	$.get("php/getCountries.php",
 
 		function(result) {
@@ -46,37 +61,50 @@ function fillSelect() {
 			//console.log("data:");
 			//console.log(result.data);
 
-			//run = true;
 			$.each(result.data, function(k, v) {
 				// console.log(k, v);
 				$('#selCountry').append(`<option value='${v}'>${k}</option>`);
-				if (run) {
+				if (!countryCode) {
 					countryCode = v;
-					run = false;
-					//console.log("countryCode: ", countryCode, run);
+					//console.log("countryCode:", countryCode);
 				}
 			});
+
+			// perform another AJAX call with the navigator LatLngs to retrieve the country code and change the value of the select.
+			// console.log(navigator.geolocation);
+			if (navigator.geolocation) navigator.geolocation.getCurrentPosition(showPosition);
+			else getCountryGeometry(countryCode);
+			//console.log(countryCode);
+
+			//$('#countrySelect').val(<iso_code>).change();
 		}
 	);
 }
 
-//	===========================================================================
+//	=== pobieranie danych o kraju i wyświetlanie ich na mapie: ================
 function getCountryGeometry(code) {
-	//console.log("=== getCountryGeometry.php ==========================================================");
 	$.get("php/getCountryGeometry.php",
 		{ code: code },
 
 		function(result) {
+			//console.log("code:", code);
+
 			//console.log(result);
 			//console.log("data:");
 			//console.log(result.data);
 
-			/// return result.data;	//	to nie ma sensu! - wywołanie asynchroniczne
+			//let rdp = result.data.properties;
+			//$('#txtCName').html(rdp.name);
+			//$('#txtCCode').html(rdp.iso_a2);
+			//console.log(rdp.name, rdp.iso_a2);
+
+			geoJson.clearLayers();			//	kasowanie starej warstwy
+			geoJson.addData(result.data);	//	dodanie nowej warstwy
+			map.fitBounds(geoJson.getLayers()[0].getBounds());
 		}
 	);
-
-	/// return, ale skąd??
 }
+
 //	===========================================================================
 function showPosition(position) {
 	c = position.coords;
@@ -103,33 +131,16 @@ function getCountryCode(coords) {
 
 		function(result) {
 			var rd = result.data;
-			$('#status').text('status' in rd);		//	sprawdzenie obecności pola status
+			//$('#status').text('status' in rd);		//	sprawdzenie obecności pola status
 			if (result.status.code == 200)			//	tego i tak nikt nie sprawdzi gdy przyjdą niewłaściwe dane
-				if ('status' in rd)
-					$('#txtStatus')	.html(rd.status.message);
+				if ('status' in rd)	console.log("Note:", rd.status.message);
 				else {
 					//console.log(rd.countryCode);
 					countryCode = rd.countryCode;
-					/// getCountryGeometry(rd.conutryCode); to nie zadziała
-
-					//console.log("=== getCountryGeometry.php ==========================================================");
-					$.get("php/getCountryGeometry.php",
-						{ code: rd.countryCode },
-				
-						function(result) {
-							//console.log(result);
-							//console.log("data:");
-							//console.log(result.data);
-
-							let rdp = result.data.properties;
-							$('#txtCName').html(rdp.name);
-							$('#txtCCode').html(rdp.iso_a2);
-
-							geoJson.clearLayers();			//	kasowanie starej warstwy
-							geoJson.addData(result.data);	//	dodanie nowej warstwy
-							map.fitBounds(geoJson.getLayers()[0].getBounds());
-						}
-					);					
+					getCountryGeometry(countryCode);
+					$("#selCountry").val(countryCode);
+					//console.log($("#selCountry").val());
+					getMarkers(countryCode);
 				}
 		}
 	);
@@ -142,7 +153,6 @@ function round(val) {
 
 //	===========================================================================
 function getCountryInfo(countryCode) {
-	//console.log("=== getCountryInfo.php ==========================================================");
 	$.get("php/getCountryInfo.php",
 		{ code: countryCode },
 
@@ -219,7 +229,8 @@ function getWeatherInfo(coords) {
 		function(result) {
 			var rd = result.data;
 			//console.log(rd);
-			$('#txtIcon')	.html("<img src='assets/weatherIcons/" + rd.weather[0].icon + ".png'></img>");
+
+/*			$('#txtIcon').html("<img src='assets/weatherIcons/" + rd.weather[0].icon + ".png'></img>");
 			if (rd.weather[0].icon[2] == 'd') console.log('day');
 			else console.log('night');
 
@@ -233,6 +244,39 @@ function getWeatherInfo(coords) {
 			$('#txtDirection')	.html(rd.wind.deg + " &deg;");
 			$('#txtClouds')		.html(rd.weather[0].description);
 			$('#txtVisibility')	.html(rd.visibility + " m");
+*/
+			$('#txtDate1').html(Date.parse(rd.list[0].dt_txt).toString("ddd dS"));
+			//console.log(Date.parse(rd.list[0].dt_txt).toString("ddd dS"));
+			$('#txtCity').html(rd.city.name);
+			$('#txtIcon').html("<img src='assets/weatherIcons/" + rd.list[0].weather[0].icon + ".png'></img>");
+			$('#txtDescription').html(rd.list[0].weather[0].description.toUpperCase(0));
+			$('#txtTemperature1').html(rd.list[0].main.temp + " &deg;C");
+			$('#txtTemperatureFeels1').html(rd.list[0].main.feels_like + " &deg;C");
+			$('#txtWindSpeed').html(rd.list[0].wind.speed + " km/h");
+			$('#txtWindDirection').html(rd.list[0].wind.deg + " &deg;");
+			$('#txtDate2').html(Date.parse(rd.list[7].dt_txt).toString("ddd dS"));
+			$('#txtDate3').html(Date.parse(rd.list[15].dt_txt).toString("ddd dS"));
+			$('#txtDate4').html(Date.parse(rd.list[23].dt_txt).toString("ddd dS"));
+			$('#txtDate5').html(Date.parse(rd.list[31].dt_txt).toString("ddd dS"));
+			$('#txtTemperature2').html(rd.list[7].main.temp + " &deg;C");
+			$('#txtTemperature3').html(rd.list[15].main.temp + " &deg;C");
+			$('#txtTemperature4').html(rd.list[23].main.temp + " &deg;C");
+			$('#txtTemperature5').html(rd.list[31].main.temp + " &deg;C");
+			$('#txtTemperatureFeels2').html(rd.list[7].main.feels_like + " &deg;C");
+			$('#txtTemperatureFeels3').html(rd.list[15].main.feels_like + " &deg;C");
+			$('#txtTemperatureFeels4').html(rd.list[23].main.feels_like + " &deg;C");
+			$('#txtTemperatureFeels5').html(rd.list[31].main.feels_like + " &deg;C");
+			$('#txtIcon2').html("<img src='assets/weatherIcons/" + rd.list[7].weather[0].icon + ".png'></img>");
+			$('#txtIcon3').html("<img src='assets/weatherIcons/" + rd.list[15].weather[0].icon + ".png'></img>");
+			$('#txtIcon4').html("<img src='assets/weatherIcons/" + rd.list[23].weather[0].icon + ".png'></img>");
+			$('#txtIcon5').html("<img src='assets/weatherIcons/" + rd.list[31].weather[0].icon + ".png'></img>");
+
+
+			/*
+			for (let i = 0; i < 40; i+=8) {		//	5x, co 24h
+				console.log(rd.list[i].dt_txt, Date.parse(rd.list[i].dt_txt).toString("ddd dS"));
+			} */
+			//console.log(Date());
 		}
 	)
 }
@@ -300,7 +344,7 @@ function getMarkers(countryCode) {
 		.then(data => {
 				//console.log(data);
 				let markers = data.results;
-				console.log(markers);
+				//console.log(markers);
 
 				markers.forEach(addMarker2);
 			}
@@ -310,139 +354,62 @@ function getMarkers(countryCode) {
 
 //	===========================================================================
 $(document).ready(function() {
-    //geoJson = L.geoJson({style: {color: 'red'}}).addTo(map);
-    //geoJson = L.geoJson({style: {color: '#F00'}});
-    geoJson = L.geoJSON(null, {style: {color: 'Green'}}).addTo(map);
 	fillSelect();
-	//while (run) ;				//	!oczekanie na zakończnie fillSelect()!
-	//console.log(run);
-
-	//	current position and setting up the marker:
-	//console.log(navigator.geolocation);
-	if (navigator.geolocation) navigator.geolocation.getCurrentPosition(showPosition);
-	//else ...;
-	//console.log("else: ", countryCode);
-
-	setTimeout(() => {
-		$.get("php/getCountryGeometry.php",
-			{ code: countryCode },
-
-			function(result) {
-				let rdp = result.data.properties;
-				$('#txtCName').html(rdp.name);
-				$('#txtCCode').html(rdp.iso_a2);
-
-				geoJson.clearLayers();			//	kasowanie starej warstwy
-				geoJson.addData(result.data);	//	dodanie nowej warstwy
-				map.fitBounds(geoJson.getLayers()[0].getBounds());
-			}
-		);
-
-		//console.log(countryCode);
-		$("#selCountry").val(countryCode);
-		//console.log($("#selCountry").val());
-	}, 3000);
-	
-	test();
+	//console.log("countryCode:", countryCode);
 });
 
 //	===========================================================================
 function onMapClick(e) {
-	//console.log("=== map.onClick() ================================================================")
+	//console.log("--- map.onClick() ------------------------------------------")
 	//console.log(e.target);
 
 	c = e.latlng;
 	c.lat = round(c.lat);
 	c.lng = round(c.lng);
-	//$('#lat').html('Lat: ' + c.lat);
-	//$('#lng').html('Lng: ' + c.lng);
 
 	getCountryCode(c);
-	setTimeout(() => {$("#selCountry").val(countryCode);}, 3000);
 }
 
 //	===========================================================================
 $("#selCountry").change(function(e) {
-	//console.log("=== #selCountry.change() ==========================================================");
+	//console.log("=== #selCountry.change() ===================================");
 	//console.log(e);
 
-	//getCountryCode(c);
-
-	console.log(this.value);
+	//console.log(this.value);
 	countryCode = this.value;
-
-	$.get("php/getCountryGeometry.php",
-		{ code: this.value },
-
-		function(result) {
-			//console.log(result);
-			//console.log("data:");
-			console.log(result.data);
-
-			let rdp = result.data.properties;
-			$('#txtCName').html(rdp.name);
-			$('#txtCCode').html(rdp.iso_a2);
-
-			geoJson.clearLayers();			//	kasowanie starej warstwy
-			geoJson.addData(result.data);	//	dodanie nowej warstwy
-			map.fitBounds(geoJson.getLayers()[0].getBounds());
-		}
-	);
-
+	getCountryGeometry(countryCode);
+	getMarkers(countryCode);
 });
 
-//	dodanie panelu Info: =====================================================
-var info = L.control();		//	?co to robi?
-
-info.onAdd = function(map) {
-    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-    this.update();
-    return this._div;
-};
-
-// method that we will use to update the control based on feature properties passed
-info.update = function (props) {
-	// console.log(props);
-    this._div.innerHTML =	'<h4>Country Information:</h4>' +
-							'Country: <span id="txtCName"></span><br/>' +
-    						'Coundry Code: <span id="txtCCode"></span><br/>' +
-							'<hr>2022 &copy; Mike Stasiak';
-    						
-};
-
-info.addTo(map);
-
 // Easy buttons ==============================================================
+L.easyButton('<i class="fa-regular fa-file" data-bs-toggle="modal" data-bs-target="#aboutModal"></i>', () => {}).addTo(map);
+
 L.easyButton('<i class="fa-solid fa-circle-info" data-bs-toggle="modal" data-bs-target="#countryInfoModal"></i>', function(btn, map) {
 	//$(btn).attr("data-bs-toggle", "modal");
 	//$(btn).attr("data-bs-target", "#countryInfoModalLabel");
-	$(btn).attr({"data-bs-toggle": "modal", "data-bs-target": "#countryInfoModal"});
-	getCountryInfo(countryCode);
+	//$(btn).attr({"data-bs-toggle": "modal", "data-bs-target": "#countryInfoModal"});
+	//getCountryInfo(countryCode);
 
 	//console.log(btn.getAttribute("data-bs-toggle"));
 	//console.log("btn: ", $(btn).attr());
 	//console.log(map);
 	//console.log(btn);
 	//alert('you just clicked the html entity \&starf;');
-	console.log($('#countryInfoModal').attr());
+	//console.log($('#countryInfoModal').attr());
 	
 }).addTo(map);
 
+
 L.easyButton('<i class="fa-solid fa-cloud" data-bs-toggle="modal" data-bs-target="#weatherModal"></i>', function(btn, map) {
-	getWeatherInfo(c);
+	//getWeatherInfo(c);
 }).addTo(map);
 
 L.easyButton('<i class="fa-brands fa-wikipedia-w" data-bs-toggle="modal" data-bs-target="#wikiModal"></i>', function(btn, map){
-	findNearbyWikipedia(c);
- }).addTo(map);
-
- L.easyButton('<i class="fa-solid fa-location-pin"></i>', function(btn, map) {
-	// helloPopup.setLatLng(map.getCenter()).openOn(map);
-	getMarkers(countryCode);
- }).addTo(map);
+	//findNearbyWikipedia(c);
+}).addTo(map);
 
 
- L.easyButton('<i class="fa-solid fa-dollar-sign" data-bs-toggle="modal" data-bs-target="#supModal"></i>', function(btn, map) {
+L.easyButton('<i class="fa-solid fa-dollar-sign" data-bs-toggle="modal" data-bs-target="#supModal"></i>', function(btn, map) {
 /** 	var currencyInfoPopup = L.popup().setContent("<b>Suplementary information:</b><br>" +
 	"Currency name: <span id='currencyName'></span><br>" + 
 	"Currency code: <span id='currencyIso_code'></span><br>" + 
@@ -455,13 +422,26 @@ L.easyButton('<i class="fa-brands fa-wikipedia-w" data-bs-toggle="modal" data-bs
 	" Speed unit: <span id='speed_in'></span><br>" + 
 	" Time zone: <span id='timeZone'></span><br>"  
 	).setLatLng(map.getCenter()).addTo(map).openOn(map);*/
+	//getOpenCageData(c);
+}).addTo(map);
+
+// Modal triggers ==============================================================
+$("#aboutModal").on("show.bs.modal", function(e) {
+	//console.log("aboutMOdal triggered");
+});
+
+$("#countryInfoModal").on("show.bs.modal", function(e) {
+	getCountryInfo(countryCode);
+});
+
+$("#weatherModal").on("show.bs.modal", function(e) {
+	getWeatherInfo(c);
+});
+
+$("#wikiModal").on("show.bs.modal", function(e) {
+	findNearbyWikipedia(c);
+});
+
+$("#supModal").on("show.bs.modal", function(e) {
 	getOpenCageData(c);
- }).addTo(map);
-
-function test() {
-}
-
-//	===========================================================================
-$(window).load(() => {
-
-});	
+});
